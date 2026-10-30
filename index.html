@@ -24,22 +24,27 @@
       align-items: center;
     }
 
-    /* BANNER HEADER EVENT */
-    .banner-container {
+    /* HEADER BANNER PROFESIONAL */
+    .banner-header {
       width: 100%;
       background: linear-gradient(135deg, #075438 0%, #0d3225 100%);
-      display: flex;
-      justify-content: center;
+      color: white;
+      text-align: center;
+      padding: 24px 16px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
-    .banner-img {
-      width: 100%;
-      max-width: 600px;
-      height: auto;
-      max-height: 160px;
-      object-fit: cover;
-      display: block;
+    .banner-header h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .banner-header p {
+      margin: 6px 0 0;
+      font-size: 13px;
+      opacity: 0.85;
     }
 
     /* KONTENER UTAMA */
@@ -106,7 +111,7 @@
       color: #ffffff;
       border: none;
       border-radius: 20px;
-      padding: 8px 16px;
+      padding: 8px 12px;
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
@@ -120,7 +125,7 @@
       background: #111;
       border-radius: 16px;
       overflow: hidden;
-      min-height: 240px;
+      min-height: 220px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -141,8 +146,8 @@
     }
 
     .qr-overlay-icon {
-      font-size: 48px;
-      margin-bottom: 8px;
+      font-size: 42px;
+      margin-bottom: 6px;
       opacity: 0.8;
     }
 
@@ -150,12 +155,12 @@
       background: #087447;
       color: white;
       border: none;
-      padding: 12px 20px;
+      padding: 10px 18px;
       border-radius: 10px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
-      margin-top: 10px;
+      margin-top: 8px;
       transition: background 0.2s;
     }
 
@@ -315,9 +320,10 @@
 </head>
 <body>
 
-  <!-- BANNER ATAS -->
-  <div class="banner-container">
-    <img src="indovex-banner2.png" alt="INDOVEX 2026 Banner" class="banner-img">
+  <!-- HEADER BANNER PROFESIONAL -->
+  <div class="banner-header">
+    <h1>INDOVEX 2026</h1>
+    <p>Sistem Check-In & Verifikasi Tiket Peserta</p>
   </div>
 
   <div class="main-wrapper">
@@ -328,12 +334,12 @@
         <div class="header-title">
           <div class="icon-box">👥</div>
           <div class="header-text">
-            <h2>Halaman Petugas</h2>
-            <p>Scan QR Code tiket peserta untuk proses Check-In</p>
+            <h2>Panel Petugas</h2>
+            <p>Pilih petugas & scan QR</p>
           </div>
         </div>
         <select id="petugas" class="select-petugas" onchange="simpanPetugas()">
-          <option value="">Petugas ▾</option>
+          <option value="">Pilih Petugas ▾</option>
         </select>
       </div>
 
@@ -359,7 +365,7 @@
       
       <input type="text" id="tokenManual" class="input-token" placeholder="Masukkan token QR peserta">
       <button class="btn-submit" onclick="prosesManual()">
-        <span>✈️</span> Cek Peserta
+        <span>✈️</span> Konfirmasi Check-In
       </button>
 
       <!-- HASIL STATS / VERIFIKASI -->
@@ -374,7 +380,7 @@
       </div>
       <div class="info-step">
         <div class="step-num">1</div>
-        <div>Pilih nama petugas di pojok kanan atas.</div>
+        <div>Pilih nama petugas sesuai akun Anda di pojok kanan atas.</div>
       </div>
       <div class="info-step">
         <div class="step-num">2</div>
@@ -397,7 +403,7 @@
     let html5QrCode = null;
 
     window.onload = function() {
-      // Ambil daftar petugas dari backend Apps Script via JSONP
+      // Ambil daftar petugas dari tab DATA_PETUGAS di Google Sheet secara otomatis via JSONP
       const script = document.createElement('script');
       script.src = API_URL + "?action=petugas&callback=initPetugas";
       document.body.appendChild(script);
@@ -408,22 +414,30 @@
       if(res && res.berhasil && Array.isArray(res.data)) {
         res.data.forEach(p => {
           let opt = document.createElement("option");
-          opt.value = p.id;
-          opt.textContent = p.nama;
+          opt.value = p.id; // Menggunakan ID_PETUGAS (PTG001, dll)
+          opt.textContent = p.nama; // Menggunakan NAMA_PETUGAS (Petugas A, dll)
           select.appendChild(opt);
         });
+
+        // Pilih otomatis jika sebelumnya sudah pernah dipilih di browser ini
+        const savedPetugas = localStorage.getItem("indovex_petugas");
+        if(savedPetugas) {
+          select.value = savedPetugas;
+        }
       }
     }
 
     function simpanPetugas() {
       const p = document.getElementById("petugas").value;
-      if(p) localStorage.setItem("indovex_petugas", p);
+      if(p) {
+        localStorage.setItem("indovex_petugas", p);
+      }
     }
 
     function mulaiScan() {
       const petugasId = document.getElementById("petugas").value || localStorage.getItem("indovex_petugas");
       if(!petugasId) {
-        alert("Silakan pilih nama petugas di pojok kanan atas terlebih dahulu!");
+        alert("Silakan pilih nama petugas terlebih dahulu di pojok kanan atas!");
         return;
       }
 
