@@ -116,7 +116,7 @@
       font-weight: 600;
       cursor: pointer;
       outline: none;
-      max-width: 140px;
+      max-width: 150px;
     }
 
     /* AREA SCANNER KAMERA */
@@ -403,29 +403,31 @@
     let html5QrCode = null;
 
     window.onload = function() {
-      // Ambil daftar petugas dari tab DATA_PETUGAS di Google Sheet secara otomatis via JSONP
+      // Panggil daftar petugas menggunakan callback indovexCallback sesuai Apps Script
       const script = document.createElement('script');
-      script.src = API_URL + "?action=petugas&callback=initPetugas";
+      script.src = API_URL + "?action=petugas&callback=indovexCallback";
       document.body.appendChild(script);
     };
 
-    function initPetugas(res) {
+    // Fungsi Callback JSONP sesuai pendaftaran di Code.gs
+    window.indovexCallback = function(res) {
       const select = document.getElementById("petugas");
       if(res && res.berhasil && Array.isArray(res.data)) {
+        select.innerHTML = '<option value="">Pilih Petugas ▾</option>';
         res.data.forEach(p => {
           let opt = document.createElement("option");
-          opt.value = p.id; // Menggunakan ID_PETUGAS (PTG001, dll)
-          opt.textContent = p.nama; // Menggunakan NAMA_PETUGAS (Petugas A, dll)
+          opt.value = p.id;    // PTG001, PTG002, dst.
+          opt.textContent = p.nama; // Petugas A, Petugas B, dst.
           select.appendChild(opt);
         });
 
-        // Pilih otomatis jika sebelumnya sudah pernah dipilih di browser ini
+        // Ingat pilihan petugas sebelumnya jika ada
         const savedPetugas = localStorage.getItem("indovex_petugas");
         if(savedPetugas) {
           select.value = savedPetugas;
         }
       }
-    }
+    };
 
     function simpanPetugas() {
       const p = document.getElementById("petugas").value;
@@ -479,12 +481,13 @@
       hasilDiv.style.color = "#856404";
       hasilDiv.textContent = "Sedang memvalidasi tiket...";
 
+      // Untuk proses check-in juga disesuaikan callback-nya
       const script = document.createElement('script');
-      script.src = `${API_URL}?action=checkin&token=${encodeURIComponent(token)}&petugas=${encodeURIComponent(petugasId)}&callback=hasilCheckIn`;
+      script.src = `${API_URL}?action=checkin&token=${encodeURIComponent(token)}&petugas=${encodeURIComponent(petugasId)}&callback=indovexCallbackCheckin`;
       document.body.appendChild(script);
     }
 
-    window.hasilCheckIn = function(res) {
+    window.indovexCallbackCheckin = function(res) {
       const hasilDiv = document.getElementById("hasil");
       hasilDiv.style.display = "block";
       if(res && res.berhasil) {
