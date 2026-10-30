@@ -3,604 +3,487 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#075438">
-
-  <title>INDOVEX 2026 | Panel Petugas</title>
-
+  <title>INDOVEX 2026 | Halaman Petugas</title>
+  
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <style>
     * {
       box-sizing: border-box;
-    }
-
-    :root {
-      --green: #087447;
-      --green-dark: #075438;
-      --navy: #183b65;
-      --background: #f1f5f3;
-      --text: #20352c;
-      --muted: #718078;
-      --border: #d9e4dd;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     body {
       margin: 0;
+      padding: 0;
+      background-color: #f1f5f3;
+      color: #20352c;
       min-height: 100vh;
-      font-family: Arial, Helvetica, sans-serif;
-      background: var(--background);
-      color: var(--text);
       display: flex;
       flex-direction: column;
+      align-items: center;
     }
 
-    /* PERBAIKAN BANNER: Dibatasi max-width agar proporsional di laptop */
-    .banner {
+    /* BANNER HEADER EVENT */
+    .banner-container {
       width: 100%;
-      background: #073d2c;
+      background: linear-gradient(135deg, #075438 0%, #0d3225 100%);
       display: flex;
       justify-content: center;
-      overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
-    .banner img {
-      display: block;
+    .banner-img {
       width: 100%;
-      max-width: 900px; /* Membatasi lebar banner di layar besar */
-      max-height: 200px; /* Mengurangi tinggi agar tidak mendominasi */
+      max-width: 600px;
+      height: auto;
+      max-height: 160px;
       object-fit: cover;
-      object-position: center;
+      display: block;
     }
 
-    /* HALAMAN & KONTINER LEBIH PROPORSIONAL */
-    .page {
+    /* KONTENER UTAMA */
+    .main-wrapper {
       width: 100%;
+      max-width: 520px;
+      padding: 20px 16px;
       flex: 1;
-      padding: 32px 16px;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 680px; /* Dilebarkan sedikit agar pas di laptop & HP */
-      margin: 0 auto;
     }
 
     .card {
       background: #ffffff;
-      padding: 36px;
       border-radius: 20px;
-      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.07);
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e1e8e4;
+      margin-bottom: 20px;
     }
 
-    /* HEADER */
-
-    .header {
-      text-align: center;
-      margin-bottom: 28px;
+    /* HEADER CARD (PILIH PETUGAS) */
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      gap: 12px;
     }
 
-    .header h1 {
-      margin: 0 0 10px;
-      color: var(--green-dark);
-      font-size: clamp(24px, 4vw, 32px);
-      letter-spacing: 0.5px;
+    .header-title {
+      display: flex;
+      gap: 12px;
+      align-items: center;
     }
 
-    .header p {
-      margin: 0 0 14px;
-      color: var(--muted);
-      font-size: 15px;
-      line-height: 1.6;
-    }
-
-    .event-date {
-      display: inline-block;
-      padding: 8px 16px;
-      border-radius: 30px;
-      background: #e7f2eb;
-      color: var(--green-dark);
-      font-size: 13px;
-      font-weight: bold;
-    }
-
-    /* FORM */
-
-    .form-group {
-      margin-bottom: 22px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 10px;
-      font-size: 15px;
-      font-weight: bold;
-    }
-
-    select {
-      width: 100%;
-      min-height: 52px;
-      padding: 12px 15px;
-      border: 1px solid var(--border);
+    .icon-box {
+      background: #087447;
+      color: white;
+      width: 44px;
+      height: 44px;
       border-radius: 12px;
-      background: #ffffff;
-      color: var(--text);
-      font-size: 16px;
-      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
     }
 
-    select:focus {
-      border-color: var(--green);
-      box-shadow: 0 0 0 3px rgba(8, 116, 71, 0.12);
+    .header-text h2 {
+      margin: 0;
+      font-size: 18px;
+      color: #183b65;
+      font-weight: 700;
     }
 
-    button {
-      width: 100%;
-      min-height: 52px;
-      padding: 14px 16px;
-      border: 0;
-      border-radius: 12px;
+    .header-text p {
+      margin: 4px 0 0;
+      font-size: 12px;
+      color: #718078;
+    }
+
+    /* DROPDOWN PETUGAS */
+    .select-petugas {
+      background: #183b65;
       color: #ffffff;
-      font-size: 16px;
-      font-weight: bold;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s, opacity 0.2s;
+      outline: none;
+      max-width: 140px;
     }
 
-    button:disabled {
-      opacity: 0.55;
-      cursor: not-allowed;
+    /* AREA SCANNER KAMERA */
+    .scanner-box {
+      position: relative;
+      background: #111;
+      border-radius: 16px;
+      overflow: hidden;
+      min-height: 240px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #d9e4dd;
+      margin-bottom: 16px;
     }
-
-    .scan-button {
-      background: var(--green);
-    }
-
-    .scan-button:hover:not(:disabled) {
-      background: var(--green-dark);
-    }
-
-    .stop-button {
-      margin-top: 12px;
-      background: #a63830;
-    }
-
-    .stop-button:hover {
-      background: #8e2f28;
-    }
-
-    /* PEMINDAI */
 
     #reader {
-      display: none;
       width: 100%;
-      margin-top: 20px;
-      overflow: hidden;
-      border-radius: 12px;
-      border: 2px solid var(--border);
+      height: 100%;
     }
 
-    #reader video {
+    .scanner-placeholder {
+      text-align: center;
+      color: #ffffff;
+      padding: 20px;
+    }
+
+    .qr-overlay-icon {
+      font-size: 48px;
+      margin-bottom: 8px;
+      opacity: 0.8;
+    }
+
+    .btn-start-scan {
+      background: #087447;
+      color: white;
+      border: none;
+      padding: 12px 20px;
       border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.2s;
     }
 
-    /* PESAN */
-
-    .result {
-      display: none;
-      margin-top: 18px;
-      padding: 16px;
-      border-radius: 12px;
-      text-align: center;
-      font-size: 15px;
-      line-height: 1.6;
-      font-weight: bold;
-      overflow-wrap: anywhere;
+    .btn-start-scan:hover {
+      background: #075438;
     }
 
-    .info {
-      margin-top: 25px;
-      padding: 16px;
-      border-radius: 12px;
-      background: #eff6f0;
-      color: #28533b;
-      font-size: 13px;
-      line-height: 1.7;
+    /* DIVIDER */
+    .divider {
       text-align: center;
+      margin: 18px 0;
+      position: relative;
     }
 
-    footer {
-      padding: 20px 12px;
-      text-align: center;
-      color: var(--muted);
+    .divider::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: #e1e8e4;
+      z-index: 1;
+    }
+
+    .divider span {
+      position: relative;
+      z-index: 2;
+      background: #ffffff;
+      padding: 0 12px;
+      color: #718078;
       font-size: 12px;
-      line-height: 1.7;
-      background: #e6ece8;
     }
 
-    /* RESPONSIF HP */
+    /* MANUAL INPUT */
+    .manual-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
 
-    @media (max-width: 480px) {
-      .banner img {
-        max-height: 140px;
-      }
+    .manual-icon {
+      background: #e7f2eb;
+      color: #087447;
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
 
-      .page {
-        padding: 16px 10px;
-      }
+    .manual-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #20352c;
+    }
 
-      .card {
-        padding: 22px 16px;
-        border-radius: 16px;
-      }
+    .input-token {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #d9e4dd;
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      margin-bottom: 12px;
+    }
+
+    .input-token:focus {
+      border-color: #087447;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: #183b65;
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    /* KOTAK HASIL */
+    #hasil {
+      margin-top: 16px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+      display: none;
+    }
+
+    /* KOTAK PETUNJUK PETUGAS */
+    .info-card {
+      background: #eef6f2;
+      border-radius: 16px;
+      padding: 18px;
+      border: 1px solid #d2e4d9;
+    }
+
+    .info-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #087447;
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .info-step {
+      display: flex;
+      gap: 10px;
+      font-size: 12px;
+      color: #20352c;
+      margin-bottom: 8px;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      background: #087447;
+      color: white;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    /* FOOTER */
+    footer {
+      width: 100%;
+      background: #183b65;
+      color: #ffffff;
+      text-align: center;
+      padding: 16px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-top: auto;
     }
   </style>
 </head>
-
 <body>
 
-  <!-- BANNER INDOVEX -->
-  <div class="banner">
-    <img
-      src="indovex-banner2.png"
-      alt="INDOVEX 2026 Indonesia Villages Expo"
-    >
+  <!-- BANNER ATAS -->
+  <div class="banner-container">
+    <img src="indovex-banner2.png" alt="INDOVEX 2026 Banner" class="banner-img">
   </div>
 
-  <main class="page">
-    <div class="container">
-      <section class="card">
-
-        <header class="header">
-          <h1>PANEL PETUGAS</h1>
-
-          <p>
-            INDONESIA VILLAGES EXPO 2026<br>
-            Sistem Registrasi dan Check-In Peserta
-          </p>
-
-          <span class="event-date">
-            2–4 NOVEMBER 2026
-          </span>
-        </header>
-
-        <div class="form-group">
-          <label for="petugas">Nama Petugas</label>
-
-          <select id="petugas">
-            <option value="">Memuat data petugas...</option>
-          </select>
+  <div class="main-wrapper">
+    <div class="card">
+      
+      <!-- HEADER PETUGAS -->
+      <div class="card-header">
+        <div class="header-title">
+          <div class="icon-box">👥</div>
+          <div class="header-text">
+            <h2>Halaman Petugas</h2>
+            <p>Scan QR Code tiket peserta untuk proses Check-In</p>
+          </div>
         </div>
+        <select id="petugas" class="select-petugas" onchange="simpanPetugas()">
+          <option value="">Petugas ▾</option>
+        </select>
+      </div>
 
-        <button
-          type="button"
-          class="scan-button"
-          id="scanBtn"
-          onclick="mulaiScan()"
-          disabled
-        >
-          ▦ SCAN QR PESERTA
-        </button>
-
+      <!-- AREA CAMERA SCANNER -->
+      <div class="scanner-box">
         <div id="reader"></div>
-
-        <button
-          type="button"
-          class="stop-button"
-          id="stopBtn"
-          onclick="hentikanScan()"
-          hidden
-        >
-          HENTIKAN KAMERA
-        </button>
-
-        <div
-          id="hasil"
-          class="result"
-          role="status"
-          aria-live="polite"
-        ></div>
-
-        <div class="info">
-          <strong>INFORMASI CHECK-IN</strong><br>
-          Pilih nama petugas, kemudian arahkan kamera
-          ke QR Code pada tiket peserta. Sistem akan
-          memvalidasi tiket secara otomatis.
+        <div id="scannerPlaceholder" class="scanner-placeholder">
+          <div class="qr-overlay-icon">🔳</div>
+          <p style="margin:0; font-size: 13px; color: #ccc;">Scan QR Code di sini</p>
+          <button class="btn-start-scan" onclick="mulaiScan()">📷 Buka Kamera</button>
         </div>
+      </div>
 
-      </section>
+      <div class="divider">
+        <span>atau</span>
+      </div>
+
+      <!-- INPUT MANUAL -->
+      <div class="manual-group">
+        <div class="manual-icon">🔍</div>
+        <div class="manual-title">Input Token QR Secara Manual</div>
+      </div>
+      
+      <input type="text" id="tokenManual" class="input-token" placeholder="Masukkan token QR peserta">
+      <button class="btn-submit" onclick="prosesManual()">
+        <span>✈️</span> Cek Peserta
+      </button>
+
+      <!-- HASIL STATS / VERIFIKASI -->
+      <div id="hasil"></div>
+
     </div>
-  </main>
 
+    <!-- PETUNJUK PETUGAS -->
+    <div class="info-card">
+      <div class="info-header">
+        <span style="font-size:18px;">ℹ️</span> Petunjuk untuk Petugas
+      </div>
+      <div class="info-step">
+        <div class="step-num">1</div>
+        <div>Pilih nama petugas di pojok kanan atas.</div>
+      </div>
+      <div class="info-step">
+        <div class="step-num">2</div>
+        <div>Scan QR Code pada tiket peserta atau masukkan token secara manual.</div>
+      </div>
+      <div class="info-step">
+        <div class="step-num">3</div>
+        <div>Pastikan status check-in berhasil muncul.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
   <footer>
-    Developed by BATU VERSITY<br>
-    INDOVEX 2026
+    Teknologi by BATU VERSITY
   </footer>
 
   <script>
-    "use strict";
+    const API_URL = "https://script.google.com/macros/s/AKfycbw68JzI8HOFyW3x1wJq8bh99wfChSZKMrqpw9uFckE-HALeyDgJG4wMw1o_eplhimiiYw/exec";
+    let html5QrCode = null;
 
-    const API_URL =
-      "https://script.google.com/macros/s/AKfycbw68JzI8HOFyW3x1wJq8bh99wfChSZKMrqpw9uFckE-HALeyDgJG4wMw1o_eplhimiiYw/exec";
+    window.onload = function() {
+      // Ambil daftar petugas dari backend Apps Script via JSONP
+      const script = document.createElement('script');
+      script.src = API_URL + "?action=petugas&callback=initPetugas";
+      document.body.appendChild(script);
+    };
 
-    let scanner = null;
-    let permintaanAktif = false;
-    let sedangMemproses = false;
-    let kameraAktif = false;
-    let waktuPermintaan = null;
-
-    const pilihanPetugas = document.getElementById("petugas");
-    const tombolScan = document.getElementById("scanBtn");
-    const tombolStop = document.getElementById("stopBtn");
-    const areaReader = document.getElementById("reader");
-    const hasil = document.getElementById("hasil");
-
-    function tampilkanHasil(pesan, sukses = false) {
-      hasil.style.display = "block";
-      hasil.style.background = sukses ? "#e4f5e9" : "#fff0ed";
-      hasil.style.color = sukses ? "#116438" : "#a12d25";
-      hasil.textContent = pesan;
-    }
-
-    function sembunyikanHasil() {
-      hasil.style.display = "none";
-    }
-
-    function panggilAPI(params, callback) {
-      if (permintaanAktif) {
-        callback({
-          berhasil: false,
-          pesan: "Permintaan sebelumnya masih diproses."
+    function initPetugas(res) {
+      const select = document.getElementById("petugas");
+      if(res && res.berhasil && Array.isArray(res.data)) {
+        res.data.forEach(p => {
+          let opt = document.createElement("option");
+          opt.value = p.id;
+          opt.textContent = p.nama;
+          select.appendChild(opt);
         });
+      }
+    }
+
+    function simpanPetugas() {
+      const p = document.getElementById("petugas").value;
+      if(p) localStorage.setItem("indovex_petugas", p);
+    }
+
+    function mulaiScan() {
+      const petugasId = document.getElementById("petugas").value || localStorage.getItem("indovex_petugas");
+      if(!petugasId) {
+        alert("Silakan pilih nama petugas di pojok kanan atas terlebih dahulu!");
         return;
       }
 
-      permintaanAktif = true;
-
-      const script = document.createElement("script");
-      const query = new URLSearchParams(params);
-
-      query.set("callback", "indovexCallback");
-
-      script.src = API_URL + "?" + query.toString();
-
-      let selesai = false;
-
-      function bersihkan() {
-        if (selesai) return;
-
-        selesai = true;
-        permintaanAktif = false;
-
-        clearTimeout(waktuPermintaan);
-
-        script.remove();
-        delete window.indovexCallback;
+      document.getElementById("scannerPlaceholder").style.display = "none";
+      
+      if(!html5QrCode) {
+        html5QrCode = new Html5Qrcode("reader");
       }
 
-      window.indovexCallback = function(data) {
-        bersihkan();
-        callback(data);
-      };
+      html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 200 },
+        qrCodeMessage => {
+          html5QrCode.stop();
+          document.getElementById("scannerPlaceholder").style.display = "flex";
+          kirimCheckIn(qrCodeMessage, petugasId);
+        },
+        errorMessage => {}
+      ).catch(err => {
+        alert("Akses kamera gagal: " + err);
+        document.getElementById("scannerPlaceholder").style.display = "flex";
+      });
+    }
 
-      script.onerror = function() {
-        bersihkan();
-        callback({
-          berhasil: false,
-          pesan: "Gagal menghubungi server. Periksa koneksi internet."
-        });
-      };
+    function prosesManual() {
+      const token = document.getElementById("tokenManual").value.trim();
+      const petugasId = document.getElementById("petugas").value || localStorage.getItem("indovex_petugas");
+      
+      if(!petugasId) { alert("Pilih nama petugas terlebih dahulu!"); return; }
+      if(!token) { alert("Masukkan token QR peserta!"); return; }
 
-      waktuPermintaan = setTimeout(function() {
-        bersihkan();
-        callback({
-          berhasil: false,
-          pesan: "Server tidak merespons. Silakan coba kembali."
-        });
-      }, 15000);
+      kirimCheckIn(token, petugasId);
+    }
 
+    function kirimCheckIn(token, petugasId) {
+      const hasilDiv = document.getElementById("hasil");
+      hasilDiv.style.display = "block";
+      hasilDiv.style.background = "#fff3cd";
+      hasilDiv.style.color = "#856404";
+      hasilDiv.textContent = "Sedang memvalidasi tiket...";
+
+      const script = document.createElement('script');
+      script.src = `${API_URL}?action=checkin&token=${encodeURIComponent(token)}&petugas=${encodeURIComponent(petugasId)}&callback=hasilCheckIn`;
       document.body.appendChild(script);
     }
 
-    function muatPetugas() {
-      pilihanPetugas.innerHTML =
-        '<option value="">Memuat data petugas...</option>';
-
-      tombolScan.disabled = true;
-
-      panggilAPI({
-        action: "petugas"
-      }, function(res) {
-
-        pilihanPetugas.innerHTML =
-          '<option value="">Pilih nama petugas</option>';
-
-        if (
-          !res ||
-          res.berhasil !== true ||
-          !Array.isArray(res.data)
-        ) {
-          tampilkanHasil(
-            res && res.pesan
-              ? res.pesan
-              : "Data petugas gagal dimuat.",
-            false
-          );
-          return;
-        }
-
-        res.data.forEach(function(p) {
-          if (!p.id || !p.nama) return;
-
-          const opsi = document.createElement("option");
-
-          opsi.value = p.id;
-          opsi.textContent = p.nama;
-
-          pilihanPetugas.appendChild(opsi);
-        });
-
-        if (pilihanPetugas.options.length <= 1) {
-          tampilkanHasil(
-            "Belum ada petugas aktif yang tersedia.",
-            false
-          );
-          return;
-        }
-
-        tombolScan.disabled = false;
-        sembunyikanHasil();
-      });
-    }
-
-    async function mulaiScan() {
-      const petugas = pilihanPetugas.value;
-
-      if (!petugas) {
-        tampilkanHasil(
-          "Silakan pilih nama petugas terlebih dahulu."
-        );
-        return;
+    window.hasilCheckIn = function(res) {
+      const hasilDiv = document.getElementById("hasil");
+      hasilDiv.style.display = "block";
+      if(res && res.berhasil) {
+        hasilDiv.style.background = "#d4edda";
+        hasilDiv.style.color = "#155724";
+        hasilDiv.textContent = "✅ " + res.pesan;
+        document.getElementById("tokenManual").value = "";
+      } else {
+        hasilDiv.style.background = "#f8d7da";
+        hasilDiv.style.color = "#721c24";
+        hasilDiv.textContent = "❌ " + (res ? res.pesan : "Gagal memproses check-in.");
       }
-
-      if (kameraAktif || scanner) return;
-
-      if (typeof Html5Qrcode === "undefined") {
-        tampilkanHasil(
-          "Pemindai QR gagal dimuat. Periksa koneksi internet."
-        );
-        return;
-      }
-
-      if (!navigator.mediaDevices ||
-          !navigator.mediaDevices.getUserMedia) {
-        tampilkanHasil(
-          "Browser tidak mendukung akses kamera. Buka melalui HTTPS."
-        );
-        return;
-      }
-
-      tombolScan.disabled = true;
-      tampilkanHasil("Meminta akses kamera...", true);
-
-      areaReader.style.display = "block";
-
-      scanner = new Html5Qrcode("reader");
-
-      try {
-        await scanner.start(
-          { facingMode: "environment" },
-          {
-            fps: 10,
-            qrbox: function(width, height) {
-              const ukuran = Math.floor(
-                Math.min(width, height) * 0.72
-              );
-
-              return {
-                width: ukuran,
-                height: ukuran
-              };
-            },
-            aspectRatio: 1
-          },
-          function(teksQR) {
-            if (sedangMemproses) return;
-
-            sedangMemproses = true;
-
-            hentikanScan().then(function() {
-              kirimCheckIn(teksQR, petugas);
-            });
-          },
-          function() {}
-        );
-
-        kameraAktif = true;
-        tombolStop.hidden = false;
-
-        tampilkanHasil(
-          "Kamera aktif. Arahkan ke QR tiket peserta.",
-          true
-        );
-
-      } catch (error) {
-        scanner = null;
-        kameraAktif = false;
-
-        areaReader.style.display = "none";
-        tombolScan.disabled = false;
-
-        tampilkanHasil(
-          "Kamera gagal dibuka. Periksa izin kamera browser dan pastikan tidak sedang digunakan aplikasi lain."
-        );
-      }
-    }
-
-    async function hentikanScan() {
-      const aktif = scanner;
-
-      if (!aktif) {
-        kameraAktif = false;
-        tombolStop.hidden = true;
-        tombolScan.disabled = false;
-        areaReader.style.display = "none";
-        return;
-      }
-
-      scanner = null;
-      kameraAktif = false;
-
-      try {
-        await aktif.stop();
-      } catch (error) {}
-
-      try {
-        await aktif.clear();
-      } catch (error) {}
-
-      areaReader.style.display = "none";
-      tombolStop.hidden = true;
-      tombolScan.disabled = false;
-    }
-
-    function kirimCheckIn(token, petugas) {
-      tampilkanHeaderHasil("QR terbaca. Sedang memvalidasi tiket peserta...", true);
-
-      panggilAPI({
-        action: "checkin",
-        token: token,
-        petugas: petugas
-      }, function(res) {
-
-        const sukses = !!(res && res.berhasil === true);
-
-        tampilkanHasil(
-          res && res.pesan
-            ? res.pesan
-            : "Server tidak memberikan informasi hasil check-in.",
-          sukses
-        );
-
-        sedangMemproses = false;
-      });
-    }
-
-    function tampilkanHeaderHasil(pesan, sukses) {
-      tampilkanHasil(pesan, sukses);
-    }
-
-    document.addEventListener("DOMContentLoaded", muatPetugas);
-
-    window.addEventListener("pagehide", function() {
-      if (scanner) {
-        scanner.stop().catch(function() {});
-      }
-    });
+    };
   </script>
-
 </body>
 </html>
