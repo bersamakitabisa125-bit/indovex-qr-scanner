@@ -1,0 +1,335 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>INDOVEX 2026 - Panel Petugas</title>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #eef2f5;
+  color: #18352d;
+}
+
+.banner {
+  width: 100%;
+  background: #073d2c;
+}
+
+.banner img {
+  width: 100%;
+  display: block;
+  height: auto;
+}
+
+.container {
+  width: 100%;
+  max-width: 600px;
+  margin: 22px auto;
+  padding: 16px;
+}
+
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 25px 20px;
+  box-shadow: 0 5px 22px #00000012;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.header h1 {
+  margin: 0;
+  color: #075438;
+  font-size: 25px;
+}
+
+.header p {
+  color: #718078;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.event-date {
+  display: inline-block;
+  background: #e7f2eb;
+  color: #075438;
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 9px;
+  font-size: 15px;
+}
+
+select {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid #d4ded8;
+  border-radius: 12px;
+  font-size: 16px;
+  background: white;
+  margin-bottom: 20px;
+}
+
+.scan-button {
+  width: 100%;
+  border: none;
+  border-radius: 13px;
+  padding: 19px 12px;
+  background: #13804c;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.scan-button:disabled {
+  opacity: .6;
+}
+
+#reader {
+  width: 100%;
+  margin-top: 18px;
+}
+
+#hasil {
+  display: none;
+  padding: 16px;
+  margin-top: 18px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: bold;
+}
+
+.info {
+  margin-top: 22px;
+  padding: 15px;
+  border-radius: 12px;
+  background: #f0f6f1;
+  color: #28533b;
+  font-size: 13px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  color: #718078;
+  font-size: 12px;
+}
+
+@media (max-width: 480px) {
+  .container {
+    margin: 12px auto;
+    padding: 12px;
+  }
+
+  .card {
+    padding: 22px 16px;
+  }
+
+  .header h1 {
+    font-size: 23px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="banner">
+  <img src="indovex-banner.png" alt="INDOVEX 2026 Indonesia Villages Expo">
+</div>
+
+<div class="container">
+  <div class="card">
+
+    <div class="header">
+      <h1>PANEL PETUGAS</h1>
+      <p>INDONESIA VILLAGES EXPO 2026<br>
+      Sistem Registrasi dan Check-In Peserta</p>
+      <span class="event-date">2–4 NOVEMBER 2026</span>
+    </div>
+
+    <label for="petugas">Nama Petugas</label>
+    <select id="petugas">
+      <option value="">Memuat data petugas...</option>
+    </select>
+
+    <button class="scan-button" id="scanBtn" onclick="mulaiScan()">
+      ▦ SCAN QR PESERTA
+    </button>
+
+    <div id="reader"></div>
+
+    <div id="hasil"></div>
+
+    <div class="info">
+      <strong>INFORMASI CHECK-IN</strong><br>
+      Pilih nama petugas, kemudian arahkan kamera ke QR Code pada tiket peserta.
+      Sistem akan memvalidasi tiket secara otomatis.
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  Developed by BATU VERSITY<br>
+  INDOVEX 2026
+</footer>
+
+<script>
+const API_URL =
+"https://script.google.com/macros/s/AKfycbw68JzI8HOFyW3x1wJq8bh99wfChSZKMrqpw9uFckE-HALeyDgJG4wMw1o_eplhimiiYw/exec";
+
+let scanner = null;
+let sedangMemproses = false;
+
+function tampilkanHasil(pesan, sukses) {
+  const hasil = document.getElementById("hasil");
+  hasil.style.display = "block";
+  hasil.style.background = sukses ? "#e4f5e9" : "#fff0ed";
+  hasil.style.color = sukses ? "#116438" : "#a12d25";
+  hasil.textContent = pesan;
+}
+
+function panggilAPI(params, callback) {
+  const script = document.createElement("script");
+  const query = new URLSearchParams(params);
+
+  script.src = API_URL + "?" + query.toString();
+  script.onerror = function() {
+    callback({berhasil:false, pesan:"Gagal menghubungi server."});
+    script.remove();
+  };
+
+  window.indovexCallback = function(data) {
+    callback(data);
+    script.remove();
+    delete window.indovexCallback;
+  };
+
+  document.body.appendChild(script);
+}
+
+function muatPetugas() {
+  panggilAPI({
+    action: "petugas",
+    callback: "indovexCallback"
+  }, function(res) {
+    const pilihan = document.getElementById("petugas");
+    pilihan.innerHTML = '<option value="">Pilih nama petugas</option>';
+
+    if (!res.berhasil || !Array.isArray(res.data)) {
+      tampilkanHasil(res.pesan || "Gagal memuat petugas.", false);
+      return;
+    }
+
+    res.data.forEach(function(p) {
+      const opsi = document.createElement("option");
+      opsi.value = p.id;
+      opsi.textContent = p.nama;
+      pilihan.appendChild(opsi);
+    });
+  });
+}
+
+function mulaiScan() {
+  const petugas = document.getElementById("petugas").value;
+
+  if (!petugas) {
+    tampilkanHasil("Silakan pilih nama petugas terlebih dahulu.", false);
+    return;
+  }
+
+  if (typeof Html5Qrcode === "undefined") {
+    tampilkanHasil("Pemindai QR gagal dimuat. Periksa koneksi internet.", false);
+    return;
+  }
+
+  if (scanner) return;
+
+  document.getElementById("scanBtn").disabled = true;
+  tampilkanHasil("Menyiapkan kamera...", true);
+
+  scanner = new Html5Qrcode("reader");
+
+  scanner.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: { width: 230, height: 230 } },
+
+    function(teksQR) {
+      if (sedangMemproses) return;
+      sedangMemproses = true;
+
+      hentikanScan();
+      kirimCheckIn(teksQR, petugas);
+    },
+
+    function() {}
+  ).then(function() {
+    tampilkanHasil("Kamera aktif. Arahkan ke QR tiket peserta.", true);
+  }).catch(function(error) {
+    scanner = null;
+    document.getElementById("scanBtn").disabled = false;
+    tampilkanHasil("Kamera gagal dibuka: " + error, false);
+  });
+}
+
+function hentikanScan() {
+  if (!scanner) return;
+
+  const aktif = scanner;
+  scanner = null;
+
+  aktif.stop().then(function() {
+    aktif.clear();
+  }).catch(function() {
+    aktif.clear();
+  });
+
+  document.getElementById("scanBtn").disabled = false;
+}
+
+function kirimCheckIn(token, petugas) {
+  tampilkanHasil("Memvalidasi tiket peserta...", true);
+
+  panggilAPI({
+    action: "checkin",
+    token: token,
+    petugas: petugas,
+    callback: "indovexCallback"
+  }, function(res) {
+    tampilkanHasil(
+      res.pesan || "Tidak ada respons dari server.",
+      res.berhasil === true
+    );
+
+    sedangMemproses = false;
+  });
+}
+
+muatPetugas();
+</script>
+
+</body>
+</html>
