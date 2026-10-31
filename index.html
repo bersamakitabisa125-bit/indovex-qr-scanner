@@ -556,12 +556,30 @@
       hasilDiv.style.color = "#856404";
       hasilDiv.textContent = "Sedang memvalidasi tiket...";
 
+      // Menggunakan callback=indovexCallback agar diizinkan oleh Code.gs
       const script = document.createElement('script');
-      script.src = `${API_URL}?action=checkin&token=${encodeURIComponent(token)}&petugas=${encodeURIComponent(petugasId)}&callback=indovexCallbackCheckin`;
+      script.src = `${API_URL}?action=checkin&token=${encodeURIComponent(token)}&petugas=${encodeURIComponent(petugasId)}&callback=indovexCallback`;
       document.body.appendChild(script);
     }
 
-    window.indovexCallbackCheckin = function(res) {
+    // Fungsi global untuk menerima hasil balasan dari Google Apps Script
+    window.indovexCallback = function(res) {
+      // Jika respons berupa daftar petugas (untuk inisialisasi awal)
+      if(res && res.data && Array.isArray(res.data) && !res.pesan) {
+        const select = document.getElementById("petugas");
+        select.innerHTML = '<option value="">Pilih Petugas ▾</option>';
+        res.data.forEach(p => {
+          let opt = document.createElement("option");
+          opt.value = p.id;
+          opt.textContent = p.nama;
+          select.appendChild(opt);
+        });
+        const savedPetugas = localStorage.getItem("indovex_petugas");
+        if(savedPetugas) { select.value = savedPetugas; }
+        return;
+      }
+
+      // Jika respons berupa hasil proses check-in
       const hasilDiv = document.getElementById("hasil");
       hasilDiv.style.display = "block";
       if(res && res.berhasil) {
