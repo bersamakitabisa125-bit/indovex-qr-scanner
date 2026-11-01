@@ -483,14 +483,16 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbySOv_FYt2OQt8UMOCFn_2zBrHeQqAR4oknNgrB500E9x9CSwqqFM-lhaQtCAKp45hSkQ/exec";
     let html5QrCode = null;
 
+    // Load data petugas saat halaman pertama kali dibuka
     window.onload = function() {
       const script = document.createElement('script');
-      script.src = API_URL + "?action=petugas&callback=indovexCallback";
+      script.src = API_URL + "?action=petugas&callback=petugasCallback";
       document.body.appendChild(script);
     };
 
-    window.indovexCallback = function(res) {
-      if(res && res.data && Array.isArray(res.data) && !res.pesan) {
+    // Callback khusus untuk mengisi dropdown petugas
+    window.petugasCallback = function(res) {
+      if(res && res.data && Array.isArray(res.data)) {
         const select = document.getElementById("petugas");
         select.innerHTML = '<option value="">Pilih Petugas ▾</option>';
         res.data.forEach(p => {
@@ -501,11 +503,76 @@
         });
         const savedPetugas = localStorage.getItem("indovex_petugas");
         if(savedPetugas) { select.value = savedPetugas; }
+      }
+    };
+
+    function simpanPetugas() {
+      const p = document.getElementById("petugas").value;
+      if(p) {
+        localStorage.setItem("indovex_petugas", p);
+      }
+    }
+
+    function mulaiScan() {
+      const petugasId = document.getElementById("petugas").value || localStorage.getItem("indovex_petugas");
+      if(!petugasId) {
+        alert("Silakan pilih nama petugas terlebih dahulu di pojok kanan atas!");
         return;
       }
 
+      document.getElementById("scannerPlaceholder").style.display = "none";
+      
+      if(!html5QrCode) {
+        html5QrCode = new Html5Qrcode("reader");
+      }
+
+      html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 200 },
+        qrCodeMessage => {
+          html5QrCode.stop();
+          document.getElementById("scannerPlaceholder").style.display = "flex";
+          kirimCheckIn(qrCodeMessage, petugasId);
+        },
+        errorMessage => {}
+      ).catch(err => {
+        alert("Akses kamera gagal: " + err);
+        document.getElementById("scannerPlaceholder").style.display = "flex";
+      });
+    }
+
+    function prosesManual() {
+      const token = document.getElementById("tokenManual").value.trim();
+      const petugasId = document.getElementById("petugas").value || localStorage.getItem("indovex_petugas");
+      
+      if(!petugasId) { alert("Pilih nama petugas terlebih dahulu!"); return; }
+      if(!token) { alert("Masukkan token QR peserta!"); return; }
+
+      kirimCheckIn(token, petugasId);
+    }
+
+    function kirimCheckIn(token, petugasId) {
       const hasilDiv = document.getElementById("hasil");
       hasilDiv.style.display = "block";
+      hasilDiv.style.background = "#fff3cd";
+      hasilDiv.style.color = "#856404";
+      hasilDiv.textContent = "Sedang memvalidasi tiket...";
+
+      // Hapus script callback lama jika ada agar tidak menumpuk
+      const oldScript = document.getElementById("checkinScript");
+      if (oldScript) oldScript.remove();
+
+      const script = document.createElement('script');
+      script.id = "checkinScript";
+      script.src = `${API_URL}?action=checkin&token=${encodeURIComponent(token)}&petugas=${encodeURIComponent(petugasId)}&callback=checkinCallback`;
+      document.body.appendChild(script);
+    }
+
+    // Callback khusus untuk menangani hasil proses check-in
+    window.checkinCallback = function(res) {
+      const hasilDiv = document.getElementById("hasil");
+      hasilDiv.style.display = "block";
+      
       if(res && res.berhasil) {
         hasilDiv.style.background = "#d4edda";
         hasilDiv.style.color = "#155724";
