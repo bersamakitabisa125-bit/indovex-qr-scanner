@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -136,7 +137,25 @@
     }
   </style>
 </head>
-<body>
+
+
+    function prosesCheckIn() {
+      // Mencegah check-in terkirim dua kali.
+      if (sedangMemproses) return;
+
+      const petugas = elemen.petugas.value;
+      const token = elemen.token.value.trim();
+
+      if (!petugas || !token) {
+        tampilkanHasil(
+          "Pilih petugas dan masukkan token QR.",
+          "error"
+        );
+        return;
+      }
+
+      sedangMemproses = true;
+      elemen.submitBtn.disabled = tr<body>
   <main class="container">
     <h1>INDOVEX 2026</h1>
     <p class="subtitle">Sistem QR Check-In Peserta</p>
@@ -176,155 +195,155 @@
   </main>
 
   <script>
-    let scanner = null;
-    let sedangMemproses = false;
-    let sedangMulaiScan = false;
+  let scanner = null;
+  let sedangMemproses = false;
+  let sedangMulaiScan = false;
 
-    const elemen = {
-      petugas: document.getElementById("petugas"),
-      token: document.getElementById("token"),
-      hasil: document.getElementById("hasil"),
-      scanBtn: document.getElementById("scanBtn"),
-      submitBtn: document.getElementById("submitBtn"),
-      reader: document.getElementById("reader")
-    };
+  const elemen = {
+    petugas: document.getElementById("petugas"),
+    token: document.getElementById("token"),
+    hasil: document.getElementById("hasil"),
+    scanBtn: document.getElementById("scanBtn"),
+    submitBtn: document.getElementById("submitBtn"),
+    reader: document.getElementById("reader")
+  };
 
-    function tampilkanHasil(pesan, jenis) {
-      elemen.hasil.textContent = pesan || "";
-      elemen.hasil.className = jenis || "info";
+  function tampilkanHasil(pesan, jenis) {
+    elemen.hasil.textContent = pesan || "";
+    elemen.hasil.className = jenis || "info";
+  }
+
+  function muatPetugas() {
+    google.script.run
+      .withSuccessHandler(function(data) {
+        elemen.petugas.innerHTML = '<option value="">Pilih petugas</option>';
+
+        if (!Array.isArray(data) || data.length === 0) {
+          tampilkanHasil("Belum ada petugas aktif pada DATA_PETUGAS.", "error");
+          return;
+        }
+
+        data.forEach(function(p) {
+          const opsi = document.createElement("option");
+          opsi.value = p.id;
+          opsi.textContent = p.nama;
+          elemen.petugas.appendChild(opsi);
+        });
+      })
+      .withFailureHandler(function(error) {
+        tampilkanHasil("Gagal memuat data petugas: " + error.message, "error");
+        elemen.petugas.innerHTML = '<option value="">Gagal memuat petugas</option>';
+      })
+      .ambilDataPetugas();
+  }
+
+  async function mulaiScan() {
+    if (sedangMulaiScan || scanner) return;
+
+    if (!elemen.petugas.value) {
+      tampilkanHasil("Pilih nama petugas terlebih dahulu.", "error");
+      return;
     }
 
-    function muatPetugas() {
-      google.script.run
-        .withSuccessHandler(function(data) {
-          elemen.petugas.innerHTML = '<option value="">Pilih petugas</option>';
-
-          if (!Array.isArray(data) || data.length === 0) {
-            tampilkanHasil("Belum ada petugas aktif pada DATA_PETUGAS.", "error");
-            return;
-          }
-
-          data.forEach(function(p) {
-            const opsi = document.createElement("option");
-            opsi.value = p.id;
-            opsi.textContent = p.nama;
-            elemen.petugas.appendChild(opsi);
-          });
-        })
-        .withFailureHandler(function(error) {
-          tampilkanHasil("Gagal memuat data petugas: " + error.message, "error");
-          elemen.petugas.innerHTML = '<option value="">Gagal memuat petugas</option>';
-        })
-        .ambilDataPetugas();
+    if (typeof Html5Qrcode === "undefined") {
+      tampilkanHasil("Library pemindai QR gagal dimuat. Periksa koneksi internet.", "error");
+      return;
     }
 
-    async function mulaiScan() {
-      if (sedangMulaiScan || scanner) return;
+    sedangMulaiScan = true;
+    elemen.scanBtn.disabled = true;
+    elemen.reader.style.display = "block";
 
-      if (!elemen.petugas.value) {
-        tampilkanHasil("Pilih nama petugas terlebih dahulu.", "error");
-        return;
-      }
+    tampilkanHasil("Meminta izin kamera...", "info");
 
-      if (typeof Html5Qrcode === "undefined") {
-        tampilkanHasil("Library pemindai QR gagal dimuat. Periksa koneksi internet.", "error");
-        return;
-      }
+    const pemindaiBaru = new Html5Qrcode("reader");
+    scanner = pemindaiBaru;
 
-      sedangMulaiScan = true;
-      elemen.scanBtn.disabled = true;
-      elemen.reader.style.display = "block";
+    try {
+      await pemindaiBaru.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 230, height: 230 } },
+        async function(teksQR) {
+          if (sedangMemproses) return;
+          elemen.token.value = String(teksQR).trim();
+          await hentikanScan();
+          prosesCheckIn();
+        },
+        function() {}
+      );
 
-      tampilkanHasil("Meminta izin kamera...", "info");
+      tampilkanHasil("Kamera aktif. Arahkan kamera ke QR Code tiket peserta.", "info");
 
-      const pemindaiBaru = new Html5Qrcode("reader");
-      scanner = pemindaiBaru;
-
-      try {
-        await pemindaiBaru.start(
-          { facingMode: "environment" },
-          { fps: 10, qrbox: { width: 230, height: 230 } },
-          async function(teksQR) {
-            if (sedangMemproses) return;
-            elemen.token.value = String(teksQR).trim();
-            await hentikanScan();
-            prosesCheckIn();
-          },
-          function() {}
-        );
-
-        tampilkanHasil("Kamera aktif. Arahkan kamera ke QR Code tiket peserta.", "info");
-
-      } catch (error) {
-        scanner = null;
-        elemen.reader.style.display = "none";
-        elemen.scanBtn.disabled = false;
-        tampilkanHasil("Kamera tidak dapat dibuka: " + error, "error");
-      } finally {
-        sedangMulaiScan = false;
-      }
-    }
-
-    async function hentikanScan() {
-      const pemindaiAktif = scanner;
-      if (!pemindaiAktif) return;
-
+    } catch (error) {
       scanner = null;
-
-      try {
-        await pemindaiAktif.stop();
-      } catch (error) {}
-
-      try {
-        pemindaiAktif.clear();
-      } catch (error) {}
-
       elemen.reader.style.display = "none";
       elemen.scanBtn.disabled = false;
+      tampilkanHasil("Kamera tidak dapat dibuka: " + error, "error");
+    } finally {
+      sedangMulaiScan = false;
+    }
+  }
+
+  async function hentikanScan() {
+    const pemindaiAktif = scanner;
+    if (!pemindaiAktif) return;
+
+    scanner = null;
+
+    try {
+      await pemindaiAktif.stop();
+    } catch (error) {}
+
+    try {
+      pemindaiAktif.clear();
+    } catch (error) {}
+
+    elemen.reader.style.display = "none";
+    elemen.scanBtn.disabled = false;
+  }
+
+  function prosesCheckIn() {
+    if (sedangMemproses) return;
+
+    const petugas = elemen.petugas.value;
+    const token = elemen.token.value.trim();
+
+    if (!petugas || !token) {
+      tampilkanHasil("Pilih petugas dan masukkan token QR.", "error");
+      return;
     }
 
-    function prosesCheckIn() {
-      if (sedangMemproses) return;
+    sedangMemproses = true;
+    elemen.submitBtn.disabled = true;
+    elemen.scanBtn.disabled = true;
 
-      const petugas = elemen.petugas.value;
-      const token = elemen.token.value.trim();
+    tampilkanHasil("Memproses check-in...", "info");
 
-      if (!petugas || !token) {
-        tampilkanHasil("Pilih petugas dan masukkan token QR.", "error");
-        return;
-      }
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (res && res.berhasil) {
+          tampilkanHasil(res.pesan, "success");
+          elemen.token.value = "";
+        } else {
+          tampilkanHasil(res && res.pesan ? res.pesan : "Check-in gagal diproses.", "error");
+        }
 
-      sedangMemproses = true;
-      elemen.submitBtn.disabled = true;
-      elemen.scanBtn.disabled = true;
+        sedangMemproses = false;
+        elemen.submitBtn.disabled = false;
+        elemen.scanBtn.disabled = false;
+      })
+      .withFailureHandler(function(error) {
+        tampilkanHasil("Terjadi kesalahan: " + error.message, "error");
 
-      tampilkanHasil("Memproses check-in...", "info");
+        sedangMemproses = false;
+        elemen.submitBtn.disabled = false;
+        elemen.scanBtn.disabled = false;
+      })
+      .prosesCheckIn(token, petugas);
+  }
 
-      google.script.run
-        .withSuccessHandler(function(res) {
-          if (res && res.berhasil) {
-            tampilkanHasil(res.pesan, "success");
-            elemen.token.value = "";
-          } else {
-            tampilkanHasil(res && res.pesan ? res.pesan : "Check-in gagal diproses.", "error");
-          }
-
-          sedangMemproses = false;
-          elemen.submitBtn.disabled = false;
-          elemen.scanBtn.disabled = false;
-        })
-        .withFailureHandler(function(error) {
-          tampilkanHasil("Terjadi kesalahan: " + error.message, "error");
-
-          sedangMemproses = false;
-          elemen.submitBtn.disabled = false;
-          elemen.scanBtn.disabled = false;
-        })
-        .prosesCheckIn(token, petugas);
-    }
-
-    // Memuat petugas saat halaman dibuka.
-    muatPetugas();
-  </script>
+  // Memuat petugas saat halaman dibuka.
+  muatPetugas();
+</script>
 </body>
 </html>
