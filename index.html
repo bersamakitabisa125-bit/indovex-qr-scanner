@@ -490,6 +490,7 @@
     };
 
     window.indovexCallback = function(res) {
+      // 1. Jika data yang dikirim adalah list petugas
       if(res && res.data && Array.isArray(res.data) && !res.pesan) {
         const select = document.getElementById("petugas");
         select.innerHTML = '<option value="">Pilih Petugas ▾</option>';
@@ -504,17 +505,21 @@
         return;
       }
 
+      // 2. Tanggapan hasil proses check-in / validasi token
       const hasilDiv = document.getElementById("hasil");
       hasilDiv.style.display = "block";
+      
       if(res && res.berhasil) {
         hasilDiv.style.background = "#d4edda";
         hasilDiv.style.color = "#155724";
-        hasilDiv.textContent = "✅ " + res.pesan;
+        // Menampilkan pesan sukses beserta nama peserta jika dikirim dari backend
+        hasilDiv.textContent = "✅ " + (res.pesan || "Check-in berhasil!");
         document.getElementById("tokenManual").value = "";
       } else {
         hasilDiv.style.background = "#f8d7da";
         hasilDiv.style.color = "#721c24";
-        hasilDiv.textContent = "❌ " + (res ? res.pesan : "Gagal memproses check-in.");
+        // Menampilkan pesan gagal (misal: "Token tidak ditemukan" atau "Sudah check-in")
+        hasilDiv.textContent = "❌ " + (res && res.pesan ? res.pesan : "Gagal memproses check-in.");
       }
     };
 
